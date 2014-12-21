@@ -1,0 +1,183 @@
+<link rel="import" href="/bower_components/firebase-element/firebase-element.html">
+<link rel="import" href="/bower_components/paper-dialog/paper-action-dialog.html">
+<link rel="import" href="/bower_components/paper-button/paper-button.html">
+<link rel="import" href="/bower_components/paper-input/paper-input.html">
+<link rel="import" href="/bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="/bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="/bower_components/paper-input/paper-autogrow-textarea.html">
+<link rel="import" href="/bower_components/firebase-element/firebase-element.html">
+<link rel="import" href="/bower_components/file-input/file-input.html">
+
+
+<polymer-element name="qa-list">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      paper-fab {
+        position: absolute !important;
+        right: 20px !important; 
+        bottom: 20px !important;
+      }
+      .ask-question {
+        padding: 20px;
+        text-align: center;
+      }
+      .question {
+        padding: 20px;
+        background: #fff;
+      }
+
+      .question h3 {
+        margin: 0;
+      }
+
+      .question h3 a {
+        color: #333;
+        text-decoration: none;
+      }
+
+      .question h3 a:hover {
+        color: #3F51B5;
+      }
+
+      .question .user {
+        padding-right: 20px;
+      }
+
+      .question .user img {
+        border-radius: 50%;
+      }
+
+      .question .details p {
+        color: #616161;
+        margin: 8px 0;
+      }
+
+      .question .metadata {
+        font-size: 12px;
+        color: #BDBDBD;
+      }
+
+      .question .metadata a {
+        color: #616161;
+        border-bottom: 1px solid #eee;
+        text-decoration: none;
+      }
+    </style>
+    <body fullbleed unresolved>
+    <firebase-element id="base" location="https://qrcodeimage.firebaseio.com/questions" data="{{questions}}" keys="{{keys}}"></firebase-element>
+    <template repeat="{{id in keys}}">
+    <paper-shadow z="1">
+      <div class="question">
+        <div horizontal center layout>
+          <div class="details" flex>
+            <h3><a href="/#/questions/{{id}}">{{questions[id]['title']}}</a></h3>
+            <p>{{questions[id]['content']}}</p>
+            <span class="metadata">gepost door <a href="{{questions[id]['html_url']}}"></a><b> {{questions[id]['user']['username']}} </b></span>
+          </div>
+          <div class="view">
+            <paper-icon-button on-click="{{viewQuestion}}" question-id="{{id}}" icon="arrow-forward" title="View Question"></paper-icon-button>
+          </div>
+        </div>
+      </div>
+    </paper-shadow>
+  </template>
+  <body unresolved fullbleed>
+      <paper-fab icon="add" on-click="{{openDialog}}"></paper-fab>
+      <paper-action-dialog id="questionDialog" heading="Ask Question" tabindex="-1" transition="core-transition-bottom">
+        <form style="height: 250px; width: 200px; overflow: hidden;">
+          <paper-input id="title" label="Titel"></paper-input>
+          <paper-autogrow-textarea id="contentArea">
+            <textarea id="content" placeholder="Beschrijving..." style="height: 100px; width: 170px;"></textarea><br />
+            <!--
+            <file-input id="imageName" type="file" accept="image/*" onchange="upload(this.files[0])">
+                Select Image
+            </file-input>
+            -->
+          </paper-autogrow-textarea>
+        </form>
+        <div id="link">
+          <script>
+          function upload(file) {
+
+              /* Is the file an image? */
+              if (!file || !file.type.match(/image.*/)) return;
+
+              /* Lets build a FormData object*/
+              var fd = new FormData(); // I wrote about it: https://hacks.mozilla.org/2011/01/how-to-develop-a-html5-image-uploader/
+              fd.append("image", file); // Append the file
+              var xhr = new XMLHttpRequest(); // Create the XHR (Cross-Domain XHR FTW!!!) Thank you sooooo much imgur.com
+              xhr.open("POST", "https://api.imgur.com/3/image.json"); // Boooom!
+              xhr.onload = function() {
+                  // Big win!
+                  console.log(JSON.parse(xhr.responseText).data.link);
+                  //var imgurl = JSON.parse(xhr.responseText).data.link;
+                  //document.getElementById('this.link').innerHTML = ("<img src=" + imgurl +">");
+
+              }
+              
+              xhr.setRequestHeader('Authorization', 'Client-ID 28aaa2e823b03b1'); // Get your own key http://api.imgur.com/
+              xhr.send(fd);
+          }
+          </script>
+        </div>
+        <paper-button affirmative autofocus on-click="{{submitQuestion}}">Ask</paper-button>
+      </paper-action-dialog>
+  </div>
+  </body>
+  </template>
+  </body>
+  <script>
+    /* Drag'n drop stuff */
+
+
+    (function () {
+      'use strict';
+
+
+
+      Polymer({
+        viewQuestion: function(e) {
+        var id = e.target.getAttribute('question-id');
+        document.location.href = '/#/questions/' + id;
+        },
+        openDialog: function() {
+          this.$.questionDialog.toggle();
+        },
+        submitQuestion: function() {
+          if (!this.$.title.value.length) {
+            alert('Schrijf een Titel');
+            return;
+          }
+
+          if (!this.$.content.value.length) {
+            alert('Schrijf een Beschrijving.');
+            return;
+          }
+
+          if (!this.$.content.image === 0) {
+            alert('Voeg een Foto toe.');
+            return;
+          }
+
+          var question = this.$.base.push({
+            title: this.$.title.value,
+            content: this.$.content.value,
+            //image: this.$.imageName.value,
+            user: {
+                username: new Date().getTime(),
+              },
+
+          });
+
+          this.$.title.value = '';
+          this.$.content.value = '';
+        }
+      });
+
+    })();
+
+</script>
+</polymer-element>

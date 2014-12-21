@@ -1,0 +1,61 @@
+<link rel="import" href="/bower_components/firebase-element/firebase-element.html">
+<link rel="import" href="/bower_components/paper-input/paper-autogrow-textarea.html">
+<link rel="import" href="/bower_components/paper-button/paper-button.html">
+
+<polymer-element name="qa-answer-form" attributes="questionId">
+  <template>
+    <style>
+      :host {
+        display: block;
+        border-top: 1px solid #f5f5f5;
+        padding: 40px;
+      }
+
+      paper-autogrow-textarea {
+        display: block;
+        margin: 0 0 10px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      paper-button .blue-ripple::shadow #ripple {
+        color: #4285f4;
+      }
+
+      paper-autogrow-textarea textarea {
+        font-size: 14px;
+      }
+    </style>
+    <body unresolved>
+    <firebase-element id="base" location="https://qrcodeimage.firebaseio.com/questions/{{questionId}}/answers" data="{{answers}}"></firebase-element>
+
+    <paper-autogrow-textarea id="answerArea">
+      <textarea id="answer" placeholder="Type your answer here..."></textarea>
+    </paper-autogrow-textarea>
+
+    <paper-button raised class="colored" role="button" on-click="{{submit}}">
+    <core-icon icon="send"></core-icon>
+    Send
+    </paper-button>
+
+  </template>
+  </body>
+  <script>
+    Polymer({
+      submit: function() {
+        if (this.$.answer.value.length) {
+          var answer = this.$.base.push({
+            content: this.$.answer.value,
+              user: {
+              username: new Date().getTime(),
+            },
+          });
+
+          this.$.answer.value = '';
+        } else {
+          console.error('Please write an answer.');
+        }
+      }
+    });
+  </script>
+</polymer-element>

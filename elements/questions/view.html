@@ -1,0 +1,51 @@
+<link rel="import" href="/bower_components/firebase-element/firebase-element.html">
+<link rel="import" href="/elements/questions/answer.html">
+<link rel="import" href="/elements/questions/answer-form.html">
+
+<polymer-element name="qa-view">
+  <template>
+    <style>
+      .question {
+        padding: 40px 20px;
+        border-bottom: 1px solid #f5f5f5;
+        text-align: center;
+      }
+      h1 {
+        margin-top: 0;
+        text-align: center;
+      }
+
+      .content {
+        color: #616161;
+        margin: 0 0 20px;
+      }
+    </style>
+        <firebase-element id="base" location="https://qrcodeimage.firebaseio.com/questions/{{id}}" data="{{question}}"></firebase-element>
+        <paper-shadow z="1">
+          <div class="question" layout horizontal>
+            <div flex>
+            {{question.user.image}}
+              <!-- <img src='{{question.image}}' width="100%"> -->
+              <h1 id="questionTitle" contenteditable?="{{editMode}}">{{question.title}}</h1>
+              <div id="questionContent" class="content" contenteditable?="{{editMode}}">
+                {{question.content}}
+              </div>
+            </div>
+          </div>
+        </paper-shadow>
+        <template repeat="{{key in keys(question.answers)}}">
+            <qa-answer id="{{key}}" questionId="{{id}}"></qa-answer>
+        </template>
+        <div>
+          <qa-answer-form questionId="{{id}}"></qa-answer-form>
+      </div>
+  </template>
+  <script>
+    Polymer({
+      editMode: false,
+      keys: function(input) {
+        if (input) return Object.keys(input);
+      }
+    });
+  </script>
+</polymer-element>
